@@ -29,7 +29,7 @@ impl Default for BasicSineSynth {
     fn default() -> Self {
         Self {
             params: Arc::new(BasicSineSynthParams::default()),
-            sine: sine::Sine::new(44100.0),
+            sine: sine::Sine::new(48000.0),
         }
     }
 }
@@ -53,7 +53,7 @@ impl Default for BasicSineSynthParams {
             editor_state: editor::default_state(),
             frequency: FloatParam::new(
                 "Frequency",
-                420.0,
+                440.0,
                 FloatRange::Skewed {
                     min: 1.0,
                     max: 20_000.0,
@@ -79,20 +79,21 @@ impl Plugin for BasicSineSynth {
 
     // The first audio IO layout is used as the default. The other layouts may be selected either
     // explicitly or automatically by the host or the user depending on the plugin API/backend.
-    const AUDIO_IO_LAYOUTS: &'static [AudioIOLayout] = &[AudioIOLayout {
-        main_input_channels: NonZeroU32::new(2),
-        main_output_channels: NonZeroU32::new(2),
+    const AUDIO_IO_LAYOUTS: &'static [AudioIOLayout] = &[
+        AudioIOLayout {
+            // This is also the default and can be omitted here
+            main_input_channels: None,
+            main_output_channels: NonZeroU32::new(2),
+            ..AudioIOLayout::const_default()
+        },
+        AudioIOLayout {
+            main_input_channels: None,
+            main_output_channels: NonZeroU32::new(1),
+            ..AudioIOLayout::const_default()
+        },
+    ];
 
-        aux_input_ports: &[],
-        aux_output_ports: &[],
-
-        // Individual ports and the layout as a whole can be named here. By default these names
-        // are generated as needed. This layout will be called 'Stereo', while a layout with
-        // only one input and output channel would be called 'Mono'.
-        names: PortNames::const_default(),
-    }];
-
-    const MIDI_INPUT: MidiConfig = MidiConfig::None;
+    const MIDI_INPUT: MidiConfig = MidiConfig::Basic;
     const MIDI_OUTPUT: MidiConfig = MidiConfig::None;
 
     const SAMPLE_ACCURATE_AUTOMATION: bool = true;
@@ -107,9 +108,12 @@ impl Plugin for BasicSineSynth {
     fn initialize(
         &mut self,
         _audio_io_layout: &AudioIOLayout,
-        _buffer_config: &BufferConfig,
+        buffer_config: &BufferConfig,
         _context: &mut impl InitContext<Self>,
     ) -> bool {
+        nih_dbg!(buffer_config.sample_rate);
+        self.sine.sampling_rate = buffer_config.sample_rate;
+
         true
     }
 
@@ -119,18 +123,20 @@ impl Plugin for BasicSineSynth {
         &mut self,
         buffer: &mut Buffer,
         _aux: &mut AuxiliaryBuffers,
-        _context: &mut impl ProcessContext<Self>,
+        context: &mut impl ProcessContext<Self>,
     ) -> ProcessStatus {
+        let mut next_event = context.next_event();
         for channel_samples in buffer.iter_samples() {
             let gain = self.params.gain.smoothed.next();
             let frequency = self.params.frequency.smoothed.next();
+            nih_dbg!(gain, frequency);
+            let sine_sample = self.sine.calculate_sine(frequency);
             for sample in channel_samples {
-                *sample = self.sine.calculate_sine(frequency);
-                *sample *= gain;
+                *sample = sine_sample * gain;
             }
         }
 
-        ProcessStatus::Normal
+        ProcessStatus::KeepAlive
     }
 
     fn editor(&mut self, _async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
@@ -149,6 +155,7 @@ impl ClapPlugin for BasicSineSynth {
         ClapFeature::Instrument,
         ClapFeature::Synthesizer,
         ClapFeature::Stereo,
+        ClapFeature::Mono,
     ];
 }
 
