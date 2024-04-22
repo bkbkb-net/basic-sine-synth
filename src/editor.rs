@@ -14,7 +14,7 @@ struct Data {
 impl Model for Data {}
 
 pub(crate) fn default_state() -> Arc<ViziaState> {
-    ViziaState::new(|| (200, 150))
+    ViziaState::new(|| (250, 130))
 }
 
 pub(crate) fn create(
@@ -31,7 +31,7 @@ pub(crate) fn create(
         .build(cx);
 
         VStack::new(cx, |cx| {
-            Label::new(cx, "Gain GUI")
+            Label::new(cx, "Basic Sine Synth")
                 .font_family(vec![FamilyOwned::Name(String::from(assets::NOTO_SANS))])
                 .font_weight(FontWeightKeyword::Thin)
                 .font_size(30.0)
