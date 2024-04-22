@@ -2205,7 +2205,7 @@ dependencies = [
 [[package]]
 name = "nih_plug"
 version = "0.0.0"
-source = "git+https://github.com/bkbkb-net/nih-plug.git#bb274976ca138289436b0bfa209b2c8c13244225"
+source = "git+https://github.com/bkbkb-net/nih-plug.git?branch=develop#6168687a7b3a72bd458c0731cf2bf5ed5ca8b9ff"
 dependencies = [
  "anyhow",
  "anymap",
@@ -2248,7 +2248,7 @@ source = "git+https://github.com/robbert-vdh/nih_plug_assets.git#a04e327923e120b
 [[package]]
 name = "nih_plug_derive"
 version = "0.1.0"
-source = "git+https://github.com/bkbkb-net/nih-plug.git#bb274976ca138289436b0bfa209b2c8c13244225"
+source = "git+https://github.com/bkbkb-net/nih-plug.git?branch=develop#6168687a7b3a72bd458c0731cf2bf5ed5ca8b9ff"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2258,7 +2258,7 @@ dependencies = [
 [[package]]
 name = "nih_plug_vizia"
 version = "0.0.0"
-source = "git+https://github.com/bkbkb-net/nih-plug.git#bb274976ca138289436b0bfa209b2c8c13244225"
+source = "git+https://github.com/bkbkb-net/nih-plug.git?branch=develop#6168687a7b3a72bd458c0731cf2bf5ed5ca8b9ff"
 dependencies = [
  "baseview",
  "crossbeam",
